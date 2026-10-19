@@ -1,0 +1,48 @@
+body {
+    background-color: #111;
+    color: white;
+    font-family: monospace;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+#game {
+    display: inline-block;
+    border: 2px solid white;
+    padding: 10px;
+}
+
+.row {
+    display: flex;
+}
+
+.cell {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 18px;
+}
+
+.wall {
+    color: #503748;
+}
+
+.floor {
+    color: #ccc;
+}
+
+.player {
+    color: #4CAF50;
+    font-weight: bold;
+}
+.enemy{
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+}
