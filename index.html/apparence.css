@@ -46,3 +46,8 @@ h1 {
     color: rgb(255, 0, 0);
     font-weight: bold;
 }
+#stats{
+    color: gold;
+    font-size: 18xp;
+    font-weight: bold;
+}
