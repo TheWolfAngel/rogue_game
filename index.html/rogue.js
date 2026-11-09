@@ -1,4 +1,3 @@
-
 // ========================================
 // CARTE DU DONJON
 // ========================================
@@ -12,8 +11,11 @@ let map = [];
 let player = {
     x: 0,
     y: 0,
-    gold: 0
+    gold: 0,
+    hp: 10,
+    maxHp: 10
 };
+let gameOver = false;
 
 // ========================================
 // ENNEMIS
@@ -108,6 +110,7 @@ function createEnemy(x, y){
         hp:3,
         damage: 1,
         gold: 10,
+        detected: false
     };
     enemies.push(enemy);
 }
@@ -228,15 +231,7 @@ function placeEnemies(rooms) {
 // VERIFICATION POSITION DES ENNEMIS
 // ========================================
 function isEnemyAt(x, y) {
-    for (let i = 0; i< enemies.length; i++) {
-        if (
-            enemies[i].x === x &&
-            enemies[i].y === y
-        ) {
-            return i;
-        }
-    }
-    return getEnemyAt(x, y) !==-1;
+    return getEnemyAt(x, y) !== -1;
 }
 
 // ========================================
@@ -327,18 +322,60 @@ function moveEnemy(enemy){
 }
 
 // ========================================
+// INFLIGER DES DEGATS AU JOUEUR
+// ========================================
+function damagePlayer(damage) {
+    player.hp = player.hp - damage;
+    addMessage(
+        "Vous subissez " + damage + " dégât(s) !",
+        "combat"
+    );
+    addMessage(
+        "PV restants : " + player.hp + " / " + player.maxHp,
+        "warning"
+    );
+    // Vérifier si le joueur est mort
+    if (player.hp <= 0) {
+        player.hp = 0;
+        gameOver = true;
+        addMessage("Vous êtes mort !", "combat");
+        addMessage("Fin de la partie.", "combat");
+    }
+    drawMap();
+}
+
+// ========================================
 //  TOUR DES ENNEMIS
 // ========================================
 function enemyTurn(){
     for(let i=0; i<enemies.length; i++){
         let enemy = enemies[i];
         let distance = calculateDistance(enemy.x, enemy.y, player.x, player.y);
-        //verifie si ennemi est adjacent
-        if(distance<=1){
-            console.log("Un ennemi attaque le joueur!");
-        }
-        else if(canEnemySeePlayer(enemy)){
+      // L'ennemi attaque si le joueur est adjacent
+        if (distance <= 1) {
+    addMessage("Un ennemi attaque le joueur !", "combat");
+    damagePlayer(enemy.damage);
+    // Arrêter le tour si le joueur est mort
+    if (gameOver) {return;}
+}
+        // L'ennemi détecte le joueur
+        else if (canEnemySeePlayer(enemy)) {
+            if (enemy.detected === false) {
+                addMessage("Un ennemi vous a repéré !", "warning");
+                enemy.detected = true;
+            }
+            // Mémoriser sa position avant son déplacement
+            let oldX = enemy.x;
+            let oldY = enemy.y;
             moveEnemy(enemy);
+            // Vérifier si l'ennemi a bougé
+            if (oldX !== enemy.x || oldY !== enemy.y) {
+                addMessage("Un ennemi se rapproche de vous.", "info");
+            }
+        }
+        // L'ennemi perd de vue le joueur
+        else {
+            enemy.detected = false;
         }
     }
     drawMap();
@@ -385,7 +422,15 @@ function drawMap() {
         }
         game.appendChild(row);
     }
-    document.getElementById("stats").textContent="Or:"+player.gold;
+    if (gameOver) {
+    const gameOverMessage = document.createElement("h2");
+    gameOverMessage.textContent = "VOUS ÊTES MORT";
+    gameOverMessage.classList.add("game-over");
+    game.appendChild(gameOverMessage);
+}
+    document.getElementById("stats").textContent =
+    "PV : " + player.hp + " / " + player.maxHp +
+    " | Or : " + player.gold;
 }
 
 // ========================================
@@ -410,6 +455,8 @@ function canMove(x, y) {
 // DEPLACER LE JOUEUR
 // ========================================
 function movePlayer(dx, dy) {
+    if (gameOver) {
+    return;}
     let newX = player.x + dx;
     let newY = player.y + dy;
     //verifier ennemi devant
@@ -438,11 +485,12 @@ function attackEnemy(enemyIndex){
     if(enemy.hp <= 0){
         player.gold = player.gold + enemy.gold;
         enemies.splice(enemyIndex, 1);
-        console.log("Goblin vaincu!");
-        console.log("Or obtenu: " +player.gold);
+        addMessage("Gobelin vaincu !", "success");
+        addMessage("Vous obtenez 10 pièces d'or.", "success");
     }
     else{
-        console.log("PV restants de l'ennemi:" +enemy.hp);
+        addMessage("L'ennemi subit des dégâts. PV restants : " + enemy.hp,
+            "combat");
     }
     drawMap();
 }
@@ -476,6 +524,20 @@ document.addEventListener("keydown", function(event) {
         movePlayer(1, 0);
     }
 });
+
+// ========================================
+// JOURNAL DE JEU
+// ========================================
+
+function addMessage(message, type) {
+    const messages = document.getElementById("messages");
+    const newMessage = document.createElement("p");
+    newMessage.textContent = message;
+    newMessage.classList.add("message-" + type);
+    messages.appendChild(newMessage);
+    // Garder le journal positionne sur le dernier message
+    messages.scrollTop = messages.scrollHeight;
+}
 
 // ========================================
 // DEMARRER LE JEU
