@@ -137,3 +137,18 @@ h1 {
     font-size: 30px;
     margin-top: 20px;
 }
+
+/* ========================================
+   BROUILLARD DE GUERRE
+   ======================================== */
+
+/* Cases jamais découvertes */
+.cell.unexplored {
+    background-color: #000000;
+    color: transparent;
+}
+
+/* Cases découvertes mais hors de vue */
+.cell.explored {
+    opacity: 0.4;
+}
