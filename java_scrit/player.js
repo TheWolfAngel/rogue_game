@@ -9,6 +9,8 @@ import{
 } from "./enemies.js";
 import{ attackEnemy} from "./combat.js";
 import{ collectPotion} from "./items.js";
+import { updateFog } from "./fog.js"; 
+
 
 // ========================================
 // PLACER LE JOUEUR
@@ -46,6 +48,9 @@ export function movePlayer(dx, dy, drawMap) {
     if (canMove(newX, newY)) {
         player.x = newX;
         player.y = newY;
+        
+        // Actualiser le brouillard après le déplacement
+        updateFog();
         collectPotion(newX, newY);
         enemyTurn(drawMap);
     }
