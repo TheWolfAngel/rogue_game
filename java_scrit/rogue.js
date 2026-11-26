@@ -33,6 +33,14 @@ import {
     enemyTurn
 } from "./enemies.js";
 
+// brouillard de guerre
+import {
+    initFog,
+    isVisible,
+    isExplored
+} from "./fog.js";
+
+
 // ========================================
 // UTILISER LES POTIONS
 // ========================================
@@ -77,6 +85,35 @@ function drawMap() {
             const cell =
                 document.createElement("div");
             cell.classList.add("cell");
+        
+            // ========================================
+            // BROUILLARD DE GUERRE
+            // ========================================
+
+            // Case jamais explorée
+            if (!isExplored(x, y)) {
+                cell.classList.add("unexplored");
+                row.appendChild(cell);
+                continue;
+            }
+
+            // Case déjà explorée mais non visible
+            if (!isVisible(x, y)) {
+                cell.classList.add("explored");
+
+                // Afficher uniquement le terrain
+                if (map[y][x] === "#") {
+                    cell.textContent = "#";
+                    cell.classList.add("wall");
+                } else {
+                    cell.textContent = ".";
+                    cell.classList.add("floor");
+                }
+
+                row.appendChild(cell);
+                continue;
+            }
+
             // JOUEUR
             if (
                 x === player.x &&
@@ -161,4 +198,5 @@ let rooms = generateRooms();
 placePlayer(rooms);
 placeEnemies(rooms);
 placePotions(rooms);
+initFog(); //initialisation du brouillard 
 drawMap();
